@@ -83,30 +83,11 @@ lint:
 # Quick development test
 dev-test:
 	@echo "Quick development test..."
-	python -c "
-import torch
-print(f'PyTorch version: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
-if torch.cuda.is_available():
-    print(f'GPU: {torch.cuda.get_device_name()}')
-    print(f'Compute capability: {torch.cuda.get_device_capability()}')
-"
+	@python -c "import torch; print('PyTorch version:', torch.__version__); print('CUDA available:', torch.cuda.is_available())"
 	@echo ""
-	python -c "
-try:
-    import triton
-    print(f'Triton version: {triton.__version__}')
-except ImportError:
-    print('Triton not available')
-"
+	@python -c "import triton; print('Triton version:', triton.__version__)" || echo "Triton not available"
 	@echo ""
-	python -c "
-try:
-    import ninetoothed
-    print('NineToothed imported successfully')
-except ImportError as e:
-    print(f'NineToothed import failed: {e}')
-"
+	@python -c "import ninetoothed; print('NineToothed imported successfully')" || echo "NineToothed import failed"
 
 # Documentation generation (if needed)
 docs:
@@ -122,41 +103,9 @@ ci-bench: install bench
 sysinfo:
 	@echo "System Information"
 	@echo "=================="
-	python -c "
-import sys
-import torch
-import subprocess
-import platform
-
-print(f'Python: {sys.version}')
-print(f'Platform: {platform.platform()}')
-print(f'PyTorch: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
-
-if torch.cuda.is_available():
-    print(f'CUDA version: {torch.version.cuda}')
-    print(f'GPU count: {torch.cuda.device_count()}')
-    for i in range(torch.cuda.device_count()):
-        props = torch.cuda.get_device_properties(i)
-        print(f'  GPU {i}: {props.name} ({props.total_memory//1024**3}GB)')
-
-try:
-    result = subprocess.run(['nvidia-smi', '--query-gpu=driver_version', '--format=csv,noheader'], 
-                          capture_output=True, text=True)
-    if result.returncode == 0:
-        print(f'NVIDIA Driver: {result.stdout.strip()}')
-except:
-    pass
-
-try:
-    import triton
-    print(f'Triton: {triton.__version__}')
-except:
-    print('Triton: Not available')
-
-try:
-    import ninetoothed
-    print('NineToothed: Available')
-except:
-    print('NineToothed: Not available')
-"
+	@python -c "import sys, platform; print('Python:', sys.version.split()[0]); print('Platform:', platform.platform())"
+	@echo "Dependencies:"
+	@python -c "import torch; print('  PyTorch:', torch.__version__)" || echo "  PyTorch: Not available"
+	@python -c "import torch; print('  CUDA available:', torch.cuda.is_available())" || echo "  CUDA: Not available"
+	@python -c "import triton; print('  Triton:', triton.__version__)" || echo "  Triton: Not available"
+	@python -c "import ninetoothed; print('  NineToothed: Available')" || echo "  NineToothed: Not available"
